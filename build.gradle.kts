@@ -22,7 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    runtimeOnly("org.flywaydb:flyway-core")
+    testImplementation("io.mockk:mockk:1.9.3")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
