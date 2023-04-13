@@ -1,0 +1,30 @@
+# Compiled class file
+*.class
+
+# Log Files
+log/
+*.log
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.project
+.classpath
+.settings/
+
+# Maven files
+target/
+
+# Spring Boot DevTools
+.restart
+
+# Gradle files
+.gradle/
+build/
+
+# macOS specific files
+.DS_Store
