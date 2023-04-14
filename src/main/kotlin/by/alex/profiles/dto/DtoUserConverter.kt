@@ -1,9 +1,11 @@
 package by.alex.profiles.dto
 
 import by.alex.profiles.model.User
+
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
+
 import java.io.Serializable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

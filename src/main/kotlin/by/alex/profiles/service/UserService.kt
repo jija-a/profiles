@@ -9,7 +9,9 @@ import by.alex.profiles.exception.DuplicateEntryException
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.model.User
 import by.alex.profiles.repository.UserRepository
+
 import org.springframework.stereotype.Service
+
 import java.security.InvalidParameterException
 
 @Service

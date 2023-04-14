@@ -6,26 +6,24 @@ import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.repository.UserRepository
 import by.alex.profiles.testutill.TestUser
 import by.alex.profiles.testutill.TestUserUtil
-import io.mockk.clearAllMocks
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.security.InvalidParameterException
-import java.util.*
+import org.junit.jupiter.api.TestInstance
 
+import java.security.InvalidParameterException
+import java.util.Optional
+
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class UserServiceTest {
 
     private val userRepository = mockk<UserRepository>(relaxed = true)
     private val userService = UserService(userRepository)
-
-    @BeforeEach
-    fun setUp() {
-        clearAllMocks()
-    }
 
     @Test
     fun `should return all users`() {
