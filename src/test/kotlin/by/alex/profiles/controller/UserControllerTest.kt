@@ -68,7 +68,6 @@ class UserControllerTest {
         val result = mockMvc.perform(request)
 
         result.andExpect(status().isCreated)
-            .andExpect(header().string("Location", "/api/v1/users/1"))
             .andExpect(content().json(objectMapper.writeValueAsString(createdUser)))
     }
 

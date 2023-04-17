@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.mockk
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +24,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.servlet.NoHandlerFoundException
 
 import java.lang.reflect.Executable
+import java.time.LocalDateTime
 import java.util.Locale
 
 @ExtendWith(SpringExtension::class)
@@ -47,10 +47,11 @@ class GlobalExceptionHandlerTest {
         val locale = Locale.ENGLISH
         val expectedMessage = messageSource.getMessage(ErrorMessages.RESOURCE_NOT_FOUND, arrayOf(1), locale)
 
-        val response = exHandler.handleNotFoundException(ex, locale)
+        val errorResponse = exHandler.handleNotFoundException(ex, locale)
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-        assertThat(response.body?.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 
     @Test
@@ -59,10 +60,11 @@ class GlobalExceptionHandlerTest {
         val locale = Locale.ENGLISH
         val expectedMessage = messageSource.getMessage(ErrorMessages.DUPLICATE_EMAIL, arrayOf(1), locale)
 
-        val response = exHandler.handleDuplicateEntryException(ex, locale)
+        val errorResponse = exHandler.handleDuplicateEntryException(ex, locale)
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.CONFLICT)
-        assertThat(response.body?.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.CONFLICT.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 
     @Test
@@ -74,10 +76,11 @@ class GlobalExceptionHandlerTest {
         }
         val ex = MethodArgumentNotValidException(mockk<Executable>(), br)
 
-        val response = exHandler.handleMethodArgumentNotValidException(ex, locale)
+        val errorResponse = exHandler.handleMethodArgumentNotValidException(ex, locale)
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(response.body?.messages).containsExactly(error.defaultMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(errorResponse.messages).containsExactly(error.defaultMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 
     @Test
@@ -86,10 +89,11 @@ class GlobalExceptionHandlerTest {
         val exception = HttpMessageNotReadableException("Test error message", mockk<HttpInputMessage>())
         val expectedMessage = messageSource.getMessage(ErrorMessages.REQUEST_BODY_EMPTY, null, locale)
 
-        val response = exHandler.handleHttpMessageNotReadableException(exception, locale)
+        val errorResponse = exHandler.handleHttpMessageNotReadableException(exception, locale)
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
-        assertThat(response.body?.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 
     @Test
@@ -98,10 +102,11 @@ class GlobalExceptionHandlerTest {
         val exception = NoHandlerFoundException("Test error message", "", mockk())
         val expectedMessage = messageSource.getMessage(ErrorMessages.NO_HANDLER_FOUND, null, locale)
 
-        val response = exHandler.handleNoHandlerFoundException(exception, locale)
+        val errorResponse = exHandler.handleNoHandlerFoundException(exception, locale)
 
-        assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
-        assertThat(response.body?.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 
     @Test
@@ -110,9 +115,10 @@ class GlobalExceptionHandlerTest {
         val locale = Locale.ENGLISH
         val expectedMessage = messageSource.getMessage(ErrorMessages.INTERNAL, null, locale)
 
-        val response = exHandler.handleException(ex, locale)
+        val errorResponse = exHandler.handleException(ex, locale)
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(response.body?.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
 }
