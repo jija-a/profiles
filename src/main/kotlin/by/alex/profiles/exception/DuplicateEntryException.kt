@@ -4,4 +4,3 @@ class DuplicateEntryException(
     val messageCode: String,
     val args: Array<Any>
 ) : RuntimeException()
-

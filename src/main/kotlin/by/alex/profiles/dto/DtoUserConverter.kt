@@ -3,7 +3,6 @@ package by.alex.profiles.dto
 import by.alex.profiles.model.User
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import java.io.Serializable
@@ -37,6 +36,7 @@ data class UserUpdateRequest(
 ) : Serializable
 
 object DtoUtil {
+
     fun User.toDto(): UserDto {
         val registrationDateString = this.registrationDate.format(UserDto.formatter)
         return UserDto(
@@ -53,16 +53,6 @@ object DtoUtil {
             lastName = lastName,
             email = email,
             password = password,
-            registrationDate = LocalDateTime.now()
-        )
-    }
-
-    fun UserUpdateRequest.toUser(): User {
-        return User(
-            firstName = firstName ?: this.firstName.orEmpty(),
-            lastName = lastName ?: this.lastName.orEmpty(),
-            email = email ?: this.email.orEmpty(),
-            password = password ?: this.password.orEmpty(),
             registrationDate = LocalDateTime.now()
         )
     }

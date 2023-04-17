@@ -4,12 +4,14 @@ import by.alex.profiles.exception.DuplicateEntryException
 import by.alex.profiles.exception.EmptyParameterException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
+
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import java.util.*
+
+import java.util.Locale
 
 @ControllerAdvice
 class GlobalExceptionHandler(val messageSource: MessageSource) {
