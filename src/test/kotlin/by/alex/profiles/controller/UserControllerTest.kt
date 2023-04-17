@@ -1,7 +1,7 @@
 package by.alex.profiles.controller
 
+import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.exception.DuplicateEntryException
-import by.alex.profiles.exception.EmptyParameterException
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.service.UserService
 import by.alex.profiles.testutill.TestUser
@@ -74,9 +74,7 @@ class UserControllerTest {
 
     @Test
     fun `should return 400 if fields are empty when create user`() {
-        val createRequest = TestUserUtil.buildCreateRequest()
-
-        `when`(userService.createUser(createRequest)).thenThrow(EmptyParameterException::class.java)
+        val createRequest = UserCreateRequest("", "", "", "")
 
         val request = MockMvcRequestBuilders.post("/api/v1/users")
             .contentType(MediaType.APPLICATION_JSON)

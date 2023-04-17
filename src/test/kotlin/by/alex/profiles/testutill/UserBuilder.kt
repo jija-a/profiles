@@ -88,9 +88,9 @@ object TestUserUtil {
 
     fun buildUpdateRequest() =
         UserUpdateRequest(
-            firstName = "Jane",
+            firstName = "NewFirstName",
             lastName = null,
-            email = "janedoe@test.com",
+            email = "newemail@example.com",
             password = "newpassword"
         )
 

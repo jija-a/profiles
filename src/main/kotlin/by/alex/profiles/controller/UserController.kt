@@ -7,6 +7,7 @@ import by.alex.profiles.service.UserService
 
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,7 +23,7 @@ import java.net.URI
 class UserController(private val userService: UserService) {
 
     @PostMapping
-    fun addUser(@RequestBody userDto: UserCreateRequest): ResponseEntity<UserDto> {
+    fun addUser(@Validated @RequestBody userDto: UserCreateRequest): ResponseEntity<UserDto> {
         val createdUser = userService.createUser(userDto)
         return ResponseEntity.created(URI("/api/v1/users/${createdUser.id}")).body(createdUser)
     }
@@ -42,7 +43,7 @@ class UserController(private val userService: UserService) {
     @PutMapping("/{userId}")
     fun updateUser(
         @PathVariable userId: Long,
-        @RequestBody updateRequest: UserUpdateRequest
+        @Validated @RequestBody updateRequest: UserUpdateRequest
     ): ResponseEntity<UserDto> {
         val updatedUser = userService.updateUser(userId, updateRequest)
         return ResponseEntity.ok(updatedUser)

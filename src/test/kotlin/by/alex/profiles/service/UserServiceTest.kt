@@ -1,8 +1,6 @@
 package by.alex.profiles.service
 
-import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.exception.DuplicateEntryException
-import by.alex.profiles.exception.EmptyParameterException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.repository.UserRepository
@@ -63,7 +61,7 @@ class UserServiceTest {
             userService.getUserById(userId)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.RESOURCE_NOT_FOUND)
         assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
     }
@@ -102,19 +100,6 @@ class UserServiceTest {
     }
 
     @Test
-    fun `should throw exception when user fields are blank`() {
-        val user = UserCreateRequest("", "", "", "")
-
-        val exception = assertThrows(EmptyParameterException::class.java) {
-            userService.createUser(user)
-        }
-
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.ALL_FIELDS_REQUIRED)
-        verify(exactly = 0) { userRepository.existsByEmail(any()) }
-        verify(exactly = 0) { userRepository.save(any()) }
-    }
-
-    @Test
     fun `should update user`() {
         val userId = 1L
         val existingUser = TestUser().build()
@@ -142,7 +127,7 @@ class UserServiceTest {
             userService.updateUser(userId, updatedUser)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.RESOURCE_NOT_FOUND)
         assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
         verify(exactly = 0) { userRepository.save(any()) }
@@ -154,7 +139,7 @@ class UserServiceTest {
         val updateRequest = TestUserUtil.buildUpdateRequest()
 
         every { userRepository.findById(existingUser.id!!) } returns Optional.of(existingUser)
-        every { userRepository.findByEmail(updateRequest.email!!) } returns Optional.of(existingUser)
+        every { userRepository.existsByEmail(updateRequest.email!!) } returns true
 
         val exception = assertThrows(DuplicateEntryException::class.java) {
             userService.updateUser(existingUser.id!!, updateRequest)
@@ -163,7 +148,7 @@ class UserServiceTest {
         assertThat(exception.messageCode).isEqualTo(ErrorMessages.DUPLICATE_EMAIL)
         assertThat(exception.args).isNotEmpty.containsExactly(updateRequest.email)
         verify(exactly = 1) { userRepository.findById(existingUser.id!!) }
-        verify(exactly = 1) { userRepository.findByEmail(updateRequest.email!!) }
+        verify(exactly = 1) { userRepository.existsByEmail(updateRequest.email!!) }
         verify(exactly = 0) { userRepository.save(any()) }
     }
 
@@ -188,7 +173,7 @@ class UserServiceTest {
             userService.deleteUser(userId)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.RESOURCE_NOT_FOUND)
         verify(exactly = 1) { userRepository.existsById(userId) }
     }
 }
