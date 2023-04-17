@@ -6,6 +6,7 @@ import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.dto.UserDto
 import by.alex.profiles.dto.UserUpdateRequest
 import by.alex.profiles.exception.DuplicateEntryException
+import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.model.User
 import by.alex.profiles.repository.UserRepository
@@ -22,7 +23,9 @@ class UserService(private val userRepository: UserRepository) {
     }
 
     fun getUserById(id: Long): UserDto {
-        return userRepository.findById(id).orElseThrow { NotFoundException("User with id=$id not found") }.toDto()
+        return userRepository.findById(id)
+            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id)) }
+            .toDto()
     }
 
     fun createUser(user: UserCreateRequest): UserDto {
@@ -32,24 +35,24 @@ class UserService(private val userRepository: UserRepository) {
 
     fun updateUser(id: Long, user: UserUpdateRequest): UserDto {
         val existingUser = userRepository.findById(id)
-            .orElseThrow { NotFoundException("User with id=$id not found") }
+            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id)) }
         updateUser(user, existingUser)
         return userRepository.save(existingUser).toDto()
     }
 
     fun deleteUser(id: Long) {
         if (!userRepository.existsById(id)) {
-            throw NotFoundException("User with id=$id not found")
+            throw NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id))
         }
         userRepository.deleteById(id)
     }
 
     private fun validateUserCreateRequest(user: UserCreateRequest) {
         if (user.firstName.isBlank() || user.lastName.isBlank() || user.email.isBlank() || user.password.isBlank()) {
-            throw InvalidParameterException("All fields are required")
+            throw InvalidParameterException(ErrorMessages.ALL_FIELDS_REQUIRED)
         }
         if (userRepository.existsByEmail(user.email)) {
-            throw DuplicateEntryException("User with email ${user.email} already exists")
+            throw DuplicateEntryException(ErrorMessages.DUPLICATE_EMAIL, arrayOf(user.email))
         }
     }
 
@@ -59,7 +62,7 @@ class UserService(private val userRepository: UserRepository) {
             user.lastName?.takeIf { it.isNotBlank() }?.let { lastName = it }
             user.email?.takeIf { it.isNotBlank() }?.let {
                 if (userRepository.findByEmail(it).isPresent) {
-                    throw DuplicateEntryException("User with email $it already exists")
+                    throw DuplicateEntryException(ErrorMessages.DUPLICATE_EMAIL, arrayOf(it))
                 }
                 email = it
             }

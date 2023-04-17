@@ -2,6 +2,7 @@ package by.alex.profiles.service
 
 import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.exception.DuplicateEntryException
+import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.repository.UserRepository
 import by.alex.profiles.testutill.TestUser
@@ -15,6 +16,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.context.MessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 
 import java.security.InvalidParameterException
 import java.util.Optional
@@ -23,6 +26,7 @@ import java.util.Optional
 class UserServiceTest {
 
     private val userRepository = mockk<UserRepository>(relaxed = true)
+    private val messageSource = mockk<MessageSource>(relaxed = true)
     private val userService = UserService(userRepository)
 
     @Test
@@ -53,13 +57,15 @@ class UserServiceTest {
     @Test
     fun `should throw NotFoundException when user is not found by id`() {
         val userId = 1L
+
         every { userRepository.findById(userId) } returns Optional.empty()
 
         val exception = assertThrows(NotFoundException::class.java) {
             userService.getUserById(userId)
         }
 
-        assertThat(exception.message).isEqualTo("User with id=$userId not found")
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
+        assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
     }
 
@@ -90,7 +96,8 @@ class UserServiceTest {
             userService.createUser(createRequest)
         }
 
-        assertThat(exception.message).isEqualTo("User with email ${createRequest.email} already exists")
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.DUPLICATE_EMAIL)
+        assertThat(exception.args).isNotEmpty.containsExactly(createRequest.email)
         verify(exactly = 1) { userRepository.existsByEmail(createRequest.email) }
         verify(exactly = 0) { userRepository.save(any()) }
     }
@@ -103,7 +110,7 @@ class UserServiceTest {
             userService.createUser(user)
         }
 
-        assertThat(exception.message).isEqualTo("All fields are required")
+        assertThat(exception.message).isEqualTo(ErrorMessages.ALL_FIELDS_REQUIRED)
         verify(exactly = 0) { userRepository.existsByEmail(any()) }
         verify(exactly = 0) { userRepository.save(any()) }
     }
@@ -136,7 +143,8 @@ class UserServiceTest {
             userService.updateUser(userId, updatedUser)
         }
 
-        assertThat(exception.message).isEqualTo("User with id=$userId not found")
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
+        assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
         verify(exactly = 0) { userRepository.save(any()) }
     }
@@ -153,7 +161,8 @@ class UserServiceTest {
             userService.updateUser(existingUser.id!!, updateRequest)
         }
 
-        assertThat(exception.message).isEqualTo("User with email ${updateRequest.email} already exists")
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.DUPLICATE_EMAIL)
+        assertThat(exception.args).isNotEmpty.containsExactly(updateRequest.email)
         verify(exactly = 1) { userRepository.findById(existingUser.id!!) }
         verify(exactly = 1) { userRepository.findByEmail(updateRequest.email!!) }
         verify(exactly = 0) { userRepository.save(any()) }
@@ -180,7 +189,7 @@ class UserServiceTest {
             userService.deleteUser(userId)
         }
 
-        assertThat(exception.message).isEqualTo("User with id=$userId not found")
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
         verify(exactly = 1) { userRepository.existsById(userId) }
     }
 }

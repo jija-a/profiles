@@ -14,8 +14,7 @@ data class UserDto @JsonCreator constructor(
     @field:JsonProperty("id") val id: Long?,
     @field:JsonProperty("name") val name: String,
     @field:JsonProperty("email") val email: String,
-    @field:JsonProperty("registrationDate")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") val registrationDate: String
+    @field:JsonProperty("registrationDate") val registrationDate: String
 ) : Serializable {
     companion object {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
