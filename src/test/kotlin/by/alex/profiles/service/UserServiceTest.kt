@@ -2,6 +2,7 @@ package by.alex.profiles.service
 
 import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.exception.DuplicateEntryException
+import by.alex.profiles.exception.EmptyParameterException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.repository.UserRepository
@@ -17,9 +18,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.context.MessageSource
-import org.springframework.context.i18n.LocaleContextHolder
 
-import java.security.InvalidParameterException
 import java.util.Optional
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -64,7 +63,7 @@ class UserServiceTest {
             userService.getUserById(userId)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
         assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
     }
@@ -106,11 +105,11 @@ class UserServiceTest {
     fun `should throw exception when user fields are blank`() {
         val user = UserCreateRequest("", "", "", "")
 
-        val exception = assertThrows(InvalidParameterException::class.java) {
+        val exception = assertThrows(EmptyParameterException::class.java) {
             userService.createUser(user)
         }
 
-        assertThat(exception.message).isEqualTo(ErrorMessages.ALL_FIELDS_REQUIRED)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.ALL_FIELDS_REQUIRED)
         verify(exactly = 0) { userRepository.existsByEmail(any()) }
         verify(exactly = 0) { userRepository.save(any()) }
     }
@@ -143,7 +142,7 @@ class UserServiceTest {
             userService.updateUser(userId, updatedUser)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
         assertThat(exception.args).isNotEmpty.containsExactly(userId)
         verify(exactly = 1) { userRepository.findById(userId) }
         verify(exactly = 0) { userRepository.save(any()) }
@@ -189,7 +188,7 @@ class UserServiceTest {
             userService.deleteUser(userId)
         }
 
-        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND_ERROR)
+        assertThat(exception.messageCode).isEqualTo(ErrorMessages.NOT_FOUND)
         verify(exactly = 1) { userRepository.existsById(userId) }
     }
 }

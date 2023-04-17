@@ -6,14 +6,13 @@ import by.alex.profiles.dto.UserCreateRequest
 import by.alex.profiles.dto.UserDto
 import by.alex.profiles.dto.UserUpdateRequest
 import by.alex.profiles.exception.DuplicateEntryException
+import by.alex.profiles.exception.EmptyParameterException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.model.User
 import by.alex.profiles.repository.UserRepository
 
 import org.springframework.stereotype.Service
-
-import java.security.InvalidParameterException
 
 @Service
 class UserService(private val userRepository: UserRepository) {
@@ -24,7 +23,7 @@ class UserService(private val userRepository: UserRepository) {
 
     fun getUserById(id: Long): UserDto {
         return userRepository.findById(id)
-            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id)) }
+            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND, arrayOf(id)) }
             .toDto()
     }
 
@@ -35,21 +34,21 @@ class UserService(private val userRepository: UserRepository) {
 
     fun updateUser(id: Long, user: UserUpdateRequest): UserDto {
         val existingUser = userRepository.findById(id)
-            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id)) }
+            .orElseThrow { NotFoundException(ErrorMessages.NOT_FOUND, arrayOf(id)) }
         updateUser(user, existingUser)
         return userRepository.save(existingUser).toDto()
     }
 
     fun deleteUser(id: Long) {
         if (!userRepository.existsById(id)) {
-            throw NotFoundException(ErrorMessages.NOT_FOUND_ERROR, arrayOf(id))
+            throw NotFoundException(ErrorMessages.NOT_FOUND, arrayOf(id))
         }
         userRepository.deleteById(id)
     }
 
     private fun validateUserCreateRequest(user: UserCreateRequest) {
         if (user.firstName.isBlank() || user.lastName.isBlank() || user.email.isBlank() || user.password.isBlank()) {
-            throw InvalidParameterException(ErrorMessages.ALL_FIELDS_REQUIRED)
+            throw EmptyParameterException(ErrorMessages.ALL_FIELDS_REQUIRED)
         }
         if (userRepository.existsByEmail(user.email)) {
             throw DuplicateEntryException(ErrorMessages.DUPLICATE_EMAIL, arrayOf(user.email))
