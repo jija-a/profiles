@@ -25,37 +25,29 @@ data class UserDto @JsonCreator constructor(
 }
 
 data class UserCreateRequest(
-
     @field:NotBlank(message = "{user.name.notBlank}")
     @field:Size(min = 1, max = 50, message = "{user.name.size}")
     val firstName: String,
-
     @field:NotBlank(message = "{user.name.notBlank}")
     @field:Size(min = 1, max = 50, message = "{user.name.size}")
     val lastName: String,
-
     @field:Email(message = "{user.email.valid}")
     @field:NotBlank(message = "{user.email.notBlank}")
     @field:Size(min = 1, max = 100, message = "{user.email.size}")
     val email: String,
-
     @field:NotBlank(message = "{user.password.notBlank}")
     @field:Size(min = 6, max = 20, message = "{user.password.size}")
     val password: String
 ) : Serializable
 
 data class UserUpdateRequest(
-
     @field:Size(min = 1, max = 50, message = "{user.name.size}")
     val firstName: String?,
-
     @field:Size(min = 1, max = 50, message = "{user.name.size}")
     val lastName: String?,
-
     @field:Email(message = "{user.email.valid}")
     @field:Size(min = 1, max = 100, message = "{user.email.size}")
     val email: String?,
-
     @field:Size(min = 6, max = 20, message = "{user.password.size}")
     val password: String?
 ) : Serializable
