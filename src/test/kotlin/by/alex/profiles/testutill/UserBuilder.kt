@@ -30,50 +30,15 @@ class TestUser {
         return this
     }
 
-    fun withEmail(email: String): TestUser {
-        this.email = email
-        return this
-    }
-
-    fun withFirstName(firstName: String): TestUser {
-        this.firstName = firstName
-        return this
-    }
-
-    fun withLastName(lastName: String): TestUser {
-        this.lastName = lastName
-        return this
-    }
-
-    fun withPassword(password: String): TestUser {
-        this.password = password
-        return this
-    }
-
-    fun withRegistrationDate(registrationDate: LocalDateTime): TestUser {
-        this.registrationDate = registrationDate
-        return this
-    }
-
     fun build(): User {
-        return User(id, firstName, lastName, email, password, registrationDate)
+        return User(id, firstName, lastName, email, password, mutableSetOf(), registrationDate)
     }
 }
 
 object TestUserUtil {
 
     fun toDto(user: User): UserDto =
-        UserDto(user.id, "${user.firstName} ${user.lastName}", user.email, TestUser.registrationDate)
-
-    fun toDto(cr: UserCreateRequest): UserDto {
-        val user: User = TestUser()
-            .withFirstName(cr.firstName)
-            .withLastName(cr.lastName)
-            .withEmail(cr.email)
-            .withPassword(cr.password)
-            .build()
-        return toDto(user)
-    }
+        UserDto(user.id, "${user.firstName} ${user.lastName}", user.email, TestUser.registrationDate, emptyList())
 
     fun updateAndBuildDto(existingUser: User, cr: UserUpdateRequest): UserDto {
         cr.email.takeIf { it != null }?.let { existingUser.email = it }
@@ -94,9 +59,5 @@ object TestUserUtil {
             password = "newpassword"
         )
 
-    fun createNotEmptyUserList() =
-        listOf(
-            TestUser().withId(1L).build(),
-            TestUser().withId(2L).build()
-        )
+    fun buildDto() = toDto(TestUser().build())
 }

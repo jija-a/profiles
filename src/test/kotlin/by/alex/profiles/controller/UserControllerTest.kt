@@ -57,7 +57,7 @@ class UserControllerTest {
     @Test
     fun `should create user successfully`() {
         val createRequest = TestUserUtil.buildCreateRequest()
-        val createdUser = TestUserUtil.toDto(createRequest)
+        val createdUser = TestUserUtil.toDto(TestUser().build())
 
         `when`(userService.createUser(createRequest)).thenReturn(createdUser)
 
@@ -88,7 +88,10 @@ class UserControllerTest {
 
     @Test
     fun `should return a list of all users`() {
-        val expected = TestUserUtil.createNotEmptyUserList().map { TestUserUtil.toDto(it) }
+        val expected = listOf(
+            TestUserUtil.buildDto(),
+            TestUserUtil.buildDto()
+        )
 
         `when`(userService.getAllUsers()).thenReturn(expected)
 

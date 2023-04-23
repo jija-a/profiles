@@ -10,14 +10,14 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
 import java.io.Serializable
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 data class UserDto @JsonCreator constructor(
     @field:JsonProperty("id") val id: Long?,
     @field:JsonProperty("name") val name: String,
     @field:JsonProperty("email") val email: String,
-    @field:JsonProperty("registrationDate") val registrationDate: String
+    @field:JsonProperty("registrationDate") val registrationDate: String,
+    @field:JsonProperty("roles") val roles: List<String>
 ) : Serializable {
     companion object {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -55,11 +55,12 @@ data class UserUpdateRequest(
 object DtoUtil {
 
     fun User.toDto(): UserDto {
-        val registrationDateString = this.registrationDate.format(UserDto.formatter)
+        val registrationDateString = registrationDate.format(UserDto.formatter)
         return UserDto(
             id = id,
             name = "$firstName $lastName",
             email = email,
+            roles = roles.map { it.name },
             registrationDate = registrationDateString
         )
     }
@@ -69,8 +70,7 @@ object DtoUtil {
             firstName = firstName,
             lastName = lastName,
             email = email,
-            password = password,
-            registrationDate = LocalDateTime.now()
+            password = password
         )
     }
 }

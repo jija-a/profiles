@@ -1,34 +1,36 @@
 package by.alex.profiles.service
 
+import by.alex.profiles.dto.DtoUtil.toDto
+import by.alex.profiles.dto.DtoUtil.toUser
 import by.alex.profiles.exception.DuplicateEntryException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
 import by.alex.profiles.repository.UserRepository
 import by.alex.profiles.testutill.TestUser
 import by.alex.profiles.testutill.TestUserUtil
-
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
-
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.context.MessageSource
-
-import java.util.Optional
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class UserServiceTest {
 
     private val userRepository = mockk<UserRepository>(relaxed = true)
-    private val messageSource = mockk<MessageSource>(relaxed = true)
     private val userService = UserService(userRepository)
 
     @Test
     fun `should return all users`() {
-        val users = TestUserUtil.createNotEmptyUserList()
+        val user = TestUser().build()
+        val userSpy = spyk(user)
+        val users = listOf(user, user, user)
+
+        every { userSpy.toDto() } answers { TestUserUtil.toDto(firstArg()) }
         every { userRepository.findAll() } returns users
 
         val expected = users.map { TestUserUtil.toDto(it) }
@@ -40,8 +42,10 @@ class UserServiceTest {
     @Test
     fun `should return user by id`() {
         val userId = 1L
-        val user = TestUser().build()
+        val user = TestUser().withId(userId).build()
+        val userSpy = spyk(user)
 
+        every { userSpy.toDto() } answers { TestUserUtil.toDto(firstArg()) }
         every { userRepository.findById(userId) } returns Optional.of(user)
 
         val expected = TestUserUtil.toDto(user)
@@ -70,9 +74,13 @@ class UserServiceTest {
     fun `should create user`() {
         val createRequest = TestUserUtil.buildCreateRequest()
         val user = TestUser().build()
+        val userSpy = spyk(user)
+        val createRequestSpy = spyk(createRequest)
 
         every { userRepository.existsByEmail(createRequest.email) } returns false
         every { userRepository.save(any()) } returns user
+        every { userSpy.toDto() } answers { TestUserUtil.toDto(firstArg()) }
+        every { createRequestSpy.toUser() } answers { user }
 
         val actual = userService.createUser(createRequest)
 
@@ -103,9 +111,11 @@ class UserServiceTest {
     fun `should update user`() {
         val userId = 1L
         val existingUser = TestUser().build()
+        val userSpy = spyk(existingUser)
         val updateRequest = TestUserUtil.buildUpdateRequest()
         val expected = TestUserUtil.updateAndBuildDto(existingUser, updateRequest)
 
+        every { userSpy.toDto() } answers { TestUserUtil.toDto(firstArg()) }
         every { userRepository.findById(userId) } returns Optional.of(existingUser)
         every { userRepository.save(any()) } answers { firstArg() }
 
