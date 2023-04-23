@@ -1,10 +1,16 @@
 package by.alex.profiles.model
 
+import jakarta.persistence.*
 import java.io.Serializable
 
-enum class Permission : Serializable {
-    CREATE_USER,
-    READ_USER,
-    UPDATE_USER,
-    DELETE_USER
-}
+@Entity
+@Table(name = "permissions")
+data class Permission(
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
+    @Column(name = "name", nullable = false, unique = true)
+    var name: String,
+) : Serializable
