@@ -3,11 +3,11 @@ package by.alex.profiles.controller
 import by.alex.profiles.exception.DuplicateEntryException
 import by.alex.profiles.exception.ErrorMessages
 import by.alex.profiles.exception.NotFoundException
+
 import io.mockk.every
 import io.mockk.mockk
 
 import org.assertj.core.api.Assertions.assertThat
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -15,12 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.MessageSource
+import org.springframework.core.MethodParameter
 import org.springframework.http.HttpInputMessage
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.validation.*
+import org.springframework.validation.BindingResult
+import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.NoHandlerFoundException
 
 import java.lang.reflect.Executable
@@ -105,6 +108,33 @@ class GlobalExceptionHandlerTest {
         val errorResponse = exHandler.handleNoHandlerFoundException(exception, locale)
 
         assertThat(errorResponse.status).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(errorResponse.messages).containsExactly(expectedMessage)
+        assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
+    }
+
+    @Test
+    fun `should handle MethodArgumentTypeMismatchException`() {
+        val locale = Locale.ENGLISH
+        val parameter = MethodParameter.forParameter(
+            UserController::class.java.getDeclaredMethod(
+                "getUser",
+                Long::class.java
+            ).parameters[0]
+        )
+        val exception =
+            MethodArgumentTypeMismatchException(
+                "Test error message",
+                Long::class.java,
+                "paramName",
+                parameter,
+                Exception()
+            )
+        val expectedMessage =
+            messageSource.getMessage(ErrorMessages.METHOD_ARG_TYPE_MISMATCH, arrayOf("paramName", "long"), locale)
+
+        val errorResponse = exHandler.handleMethodArgumentTypeMismatchException(exception, locale)
+
+        assertThat(errorResponse.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThat(errorResponse.messages).containsExactly(expectedMessage)
         assertThat(errorResponse.timestamp).isNotNull.isBefore(LocalDateTime.now())
     }
