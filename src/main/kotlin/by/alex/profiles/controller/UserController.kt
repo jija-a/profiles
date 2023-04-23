@@ -23,13 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
-@ApiResponse(
-    responseCode = "500",
-    description = "Indicates that an unexpected error occurred while processing request.",
-    content = [Content(
-        schema = (Schema(type = "errorResponse", implementation = ErrorResponse::class))
-    )]
-)
 @RestController
 @RequestMapping("/api/v1/users")
 class UserController(private val userService: UserService) {
@@ -46,14 +39,14 @@ class UserController(private val userService: UserService) {
             ),
             ApiResponse(
                 responseCode = "400",
-                description = "Indicates that the user data failed to pass validation.",
+                description = "User data failed to pass validation.",
                 content = [Content(
                     schema = (Schema(type = "errorResponse", implementation = ErrorResponse::class))
                 )]
             ),
             ApiResponse(
                 responseCode = "409",
-                description = "Indicates that a user with the same email address already exists.",
+                description = "User with the same email address already exists.",
                 content = [Content(
                     schema = (Schema(type = "errorResponse", implementation = ErrorResponse::class))
                 )]
